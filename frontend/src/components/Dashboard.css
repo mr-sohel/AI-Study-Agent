@@ -1,0 +1,203 @@
+.dashboard {
+  min-height: calc(100vh - 80px);
+  padding: var(--space-xl) 0;
+}
+
+.dashboard-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+}
+
+.dashboard-content {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+}
+
+.dark .dashboard-content {
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   UPLOAD SECTION
+   ============================================ */
+
+.upload-section {
+  text-align: center;
+}
+
+.welcome-text {
+  margin-bottom: var(--space-2xl);
+  text-align: center;
+}
+
+.welcome-text h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.02em;
+}
+
+.welcome-text p {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: var(--line-height-relaxed);
+}
+
+
+/* ============================================
+   FEATURES GRID
+   ============================================ */
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-lg);
+  margin: var(--space-2xl) 0 0 0;
+}
+
+.feature-card {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  text-align: center;
+  transition: all var(--transition-base);
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
+  line-height: 1;
+}
+
+.feature-card h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.feature-card p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+
+/* ============================================
+   CONTENT SECTION
+   ============================================ */
+
+.content-section {
+  min-height: 400px;
+}
+
+.document-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.document-info h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.new-document-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.new-document-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.new-document-btn:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .dashboard-container {
+    padding: 0 var(--space-lg);
+  }
+
+  .dashboard-content {
+    padding: var(--space-xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: var(--space-md) 0;
+  }
+
+  .dashboard-container {
+    padding: 0 var(--space-md);
+  }
+
+  .dashboard-content {
+    padding: var(--space-lg);
+    border-radius: var(--radius-xl);
+  }
+
+  .welcome-text h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .welcome-text p {
+    font-size: var(--font-size-sm);
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .feature-card {
+    padding: var(--space-lg);
+  }
+
+  .document-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .new-document-btn {
+    width: 100%;
+  }
+}

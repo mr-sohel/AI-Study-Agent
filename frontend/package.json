@@ -1,0 +1,35 @@
+{
+  "name": "ai-study-materials-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.3",
+    "axios": "^1.7.2",
+    "framer-motion": "^11.2.10",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "katex": "^0.16.25",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0",
+    "react-katex": "^3.1.0",
+    "react-router-dom": "^6.26.0",
+    "react-toastify": "^10.0.6",
+    "vite": "^6.0.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "node node_modules/vite/bin/vite.js build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
+  }
+}
