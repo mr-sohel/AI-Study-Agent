@@ -42,7 +42,7 @@ Before you begin, ensure you have installed:
 ### 1. Clone the repository
 ```bash
 git clone <repository-url>
-cd ai-study-materials
+cd ai-study-agent
 ```
 
 ### 2. Backend Setup
@@ -59,7 +59,7 @@ cp .env.example .env
 
 # Edit .env and add your configuration:
 # - GEMINI_API_KEY=your_gemini_api_key_here
-# - MONGODB_URI=mongodb://localhost:27017/ai-study-materials
+# - MONGODB_URI=mongodb://localhost:27017/ai-study-agent
 # - PORT=5000
 ```
 
@@ -122,7 +122,7 @@ The application will open at `http://localhost:3000`
 ## 📁 Project Structure
 
 ```
-ai-study-materials/
+ai-study-agent/
 ├── backend/
 │   ├── models/
 │   │   └── Document.js
@@ -165,7 +165,7 @@ Create a `.env` file in the `backend` directory:
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/ai-study-materials
+MONGODB_URI=mongodb://localhost:27017/ai-study-agent
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
