@@ -229,7 +229,7 @@ Supports multiple file formats:
 
 ## 📝 License
 
-This project is licensed under the MIT License.
+This project is licensed under the GPL-3.0 license
 
 ## 🤝 Contributing
 
