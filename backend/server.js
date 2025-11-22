@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 // MongoDB Connection
 
 //
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://faysalislamfd:NNhFFLEKMwxDb4mJ@cluster0.zj1pg.mongodb.net/?appName=Cluster0')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://yourusername:password/?appName=Cluster0')
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
