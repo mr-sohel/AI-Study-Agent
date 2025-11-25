@@ -60,7 +60,11 @@ Open your terminal (Command Prompt on Windows, Terminal on Mac/Linux) and run:
 
 ```bash
 git clone <repository-url>
+<<<<<<< HEAD
 cd Smart-Study-main
+=======
+cd ai-study-agent
+>>>>>>> 2c5d10983d79cd2995d8cf183c1854f1df546d10
 ```
 
 **Windows Users**: You can also use Git Bash or PowerShell.
@@ -83,7 +87,18 @@ This will install dependencies for both backend and frontend.
 ```bash
 cd backend
 npm install
+<<<<<<< HEAD
 cd ..
+=======
+
+# Create .env file
+cp .env.example .env
+
+# Edit .env and add your configuration:
+# - GEMINI_API_KEY=your_gemini_api_key_here
+# - MONGODB_URI=mongodb://localhost:27017/ai-study-agent
+# - PORT=5000
+>>>>>>> 2c5d10983d79cd2995d8cf183c1854f1df546d10
 ```
 
 **Frontend:**
@@ -321,6 +336,7 @@ After uploading, you'll see three tabs:
 ## 📁 Project Structure
 
 ```
+<<<<<<< HEAD
 Smart-Study-main/
 ├── api/                          # Vercel serverless functions
 │   ├── generate/
@@ -332,6 +348,11 @@ Smart-Study-main/
 │       └── text.js
 ├── backend/                      # Backend server
 │   ├── models/                  # MongoDB models
+=======
+ai-study-agent/
+├── backend/
+│   ├── models/
+>>>>>>> 2c5d10983d79cd2995d8cf183c1854f1df546d10
 │   │   └── Document.js
 │   ├── routes/                  # API routes
 │   │   ├── upload.js
@@ -372,6 +393,11 @@ The `.env` file in the `backend` directory should contain:
 MONGODB_URI=your_mongodb_connection_string
 GEMINI_API_KEY=your_gemini_api_key
 PORT=5000
+<<<<<<< HEAD
+=======
+MONGODB_URI=mongodb://localhost:27017/ai-study-agent
+GEMINI_API_KEY=your_gemini_api_key_here
+>>>>>>> 2c5d10983d79cd2995d8cf183c1854f1df546d10
 ```
 
 ### API Configuration
@@ -529,10 +555,42 @@ Supports multiple file formats:
 
 ## 🔒 Security Notes
 
+<<<<<<< HEAD
 - Never commit your `.env` file to version control
 - Keep your API keys secure
 - Use environment variables for all sensitive data
 - The `.env` file is already in `.gitignore`
+=======
+### MongoDB Connection Issues
+```bash
+# Make sure MongoDB is running
+# Check connection string in .env
+```
+
+### File Upload Fails
+- Ensure file is under 10MB
+- Check file format (PDF, DOCX, or TXT only)
+- Verify backend server is running
+
+### AI Generation Errors
+- Verify Gemini API key is correct
+- Check API quota/limits
+- Ensure internet connection
+
+## 🚀 Future Enhancements
+
+- [ ] User authentication and accounts
+- [ ] Save study sessions
+- [ ] Collaborative study groups
+- [ ] More export formats (Markdown, Anki)
+- [ ] Voice-to-text for handwritten notes
+- [ ] Mobile app version
+- [ ] Advanced analytics and progress tracking
+
+## 📝 License
+
+This project is licensed under the GPL-3.0 license
+>>>>>>> 2c5d10983d79cd2995d8cf183c1854f1df546d10
 
 ## 🤝 Contributing
 

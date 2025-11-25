@@ -31,12 +31,17 @@ app.use(express.urlencoded({ extended: true }));
 // MongoDB Connection
 const mongoUri = process.env.MONGODB_URI;
 
+<<<<<<< HEAD
 if (!mongoUri) {
   console.error('❌ MONGODB_URI environment variable is not set. Please set it in your .env file.');
   process.exit(1);
 }
 
 mongoose.connect(mongoUri)
+=======
+//
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://yourusername:password/?appName=Cluster0')
+>>>>>>> 2c5d10983d79cd2995d8cf183c1854f1df546d10
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
