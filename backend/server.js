@@ -29,11 +29,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
+const mongoUri = process.env.MONGODB_URI;
 
-//
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://faysalislamfd:NNhFFLEKMwxDb4mJ@cluster0.zj1pg.mongodb.net/?appName=Cluster0')
+if (!mongoUri) {
+  console.error('❌ MONGODB_URI environment variable is not set. Please set it in your .env file.');
+  process.exit(1);
+}
+
+mongoose.connect(mongoUri)
   .then(() => console.log('✅ MongoDB connected successfully'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 // Routes
 app.use('/api/upload', uploadRoutes);

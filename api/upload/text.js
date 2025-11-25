@@ -1,32 +1,14 @@
 const Document = require('../../backend/models/Document');
-const mongoose = require('mongoose');
-
-// Connect to MongoDB
-const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) {
-    return;
-  }
-  
-  const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://faysalislamfd:NNhFFLEKMwxDb4mJ@cluster0.zj1pg.mongodb.net/?appName=Cluster0';
-  
-  try {
-    await mongoose.connect(mongoUri);
-    console.log('✅ MongoDB connected');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    throw error;
-  }
-};
+const { connectDB } = require('../utils/db');
+const { setCORSHeaders, handleOptions } = require('../utils/cors');
+const { MIN_TEXT_LENGTH } = require('../../backend/utils/constants');
 
 module.exports = async (req, res) => {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  // Set CORS headers
+  setCORSHeaders(res);
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
+  // Handle OPTIONS preflight
+  if (handleOptions(req, res)) {
     return;
   }
 
@@ -44,8 +26,8 @@ module.exports = async (req, res) => {
     }
 
     const trimmedText = text.trim();
-    if (trimmedText.length < 20) {
-      return res.status(400).json({ error: 'Text must be at least 20 characters long' });
+    if (trimmedText.length < MIN_TEXT_LENGTH) {
+      return res.status(400).json({ error: `Text must be at least ${MIN_TEXT_LENGTH} characters long` });
     }
 
     const documentData = {

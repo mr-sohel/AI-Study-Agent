@@ -1,33 +1,16 @@
 const Document = require('../../../../backend/models/Document');
 const { generateQuiz } = require('../../../../backend/utils/geminiService');
-const mongoose = require('mongoose');
-
-// Connect to MongoDB
-const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) {
-    return;
-  }
-  
-  const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://faysalislamfd:NNhFFLEKMwxDb4mJ@cluster0.zj1pg.mongodb.net/?appName=Cluster0';
-  
-  try {
-    await mongoose.connect(mongoUri);
-    console.log('✅ MongoDB connected');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    throw error;
-  }
-};
+const { connectDB } = require('../../../utils/db');
+const { setCORSHeaders, handleOptions } = require('../../../utils/cors');
+const { shouldUseFileUpload } = require('../../../../backend/utils/textQuality');
+const { convertToBuffer } = require('../../../../backend/utils/fileBuffer');
 
 module.exports = async (req, res) => {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  // Set CORS headers
+  setCORSHeaders(res);
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
+  // Handle OPTIONS preflight
+  if (handleOptions(req, res)) {
     return;
   }
 
@@ -56,29 +39,11 @@ module.exports = async (req, res) => {
     }
 
     const extractedText = document.extractedText || '';
-    const words = extractedText.trim().split(/\s+/).filter(w => w.length > 0);
-    const uniqueWords = new Set(words.map(w => w.toLowerCase()));
-    const lowerText = extractedText.toLowerCase();
-    const hasWatermark = lowerText.includes('camscanner') || lowerText.includes('scanner');
-    const isLowQualityText = words.length < 50 || uniqueWords.size < 5 || 
-                             (uniqueWords.size === 1 && words.length > 10) ||
-                             hasWatermark ||
-                             extractedText.includes('No text extracted');
+    const shouldUseFileUploadFlag = shouldUseFileUpload(extractedText, false, document.useGeminiFileUpload);
     
-    const shouldUseFileUpload = document.useGeminiFileUpload || isLowQualityText;
+    const fileBuffer = convertToBuffer(document.fileBuffer);
     
-    let fileBuffer = null;
-    if (document.fileBuffer) {
-      if (Buffer.isBuffer(document.fileBuffer)) {
-        fileBuffer = document.fileBuffer;
-      } else if (document.fileBuffer.data) {
-        fileBuffer = Buffer.from(document.fileBuffer.data);
-      } else {
-        fileBuffer = Buffer.from(document.fileBuffer);
-      }
-    }
-    
-    if (shouldUseFileUpload && !fileBuffer) {
+    if (shouldUseFileUploadFlag && !fileBuffer) {
       return res.status(400).json({ 
         error: 'This document appears to be a scanned PDF, but the original file was not saved. Please re-upload the file.' 
       });
@@ -89,7 +54,7 @@ module.exports = async (req, res) => {
       fileBuffer,
       document.fileType,
       document.originalName,
-      shouldUseFileUpload
+      shouldUseFileUploadFlag
     );
     document.quiz = quiz;
     await document.save();

@@ -1,20 +1,16 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { FiUpload, FiFile, FiType, FiImage, FiX } from 'react-icons/fi';
+import { FiUpload, FiFile, FiType, FiImage } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { InlineMath, BlockMath } from 'react-katex';
-import 'katex/dist/katex.min.css';
 import API_BASE_URL from '../utils/api';
 import './FileUpload.css';
 import './ContentView.css';
 
-const FileUpload = ({ onUploadSuccess, onTextSummaryGenerated }) => {
+const FileUpload = ({ onUploadSuccess }) => {
   const [activeTab, setActiveTab] = useState('file'); // 'file' or 'text'
   const [file, setFile] = useState(null);
   const [textInput, setTextInput] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [generatingSummary, setGeneratingSummary] = useState(false);
-  const [textSummary, setTextSummary] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -118,28 +114,13 @@ const FileUpload = ({ onUploadSuccess, onTextSummaryGenerated }) => {
         toast.success('Text uploaded successfully!');
         const documentId = uploadResponse.data.documentId;
 
-        // Automatically generate summary
-        setGeneratingSummary(true);
-        try {
-          const summaryResponse = await axios.post(`${API_BASE_URL}/api/generate/summary/${documentId}`);
-          const summary = summaryResponse.data.summary;
-          setTextSummary(summary);
-          
-          // Call callback if provided
-          if (onTextSummaryGenerated) {
-            onTextSummaryGenerated(summary, documentId);
-          }
-          
-          toast.success('Answer generated successfully!');
-        } catch (summaryError) {
-          console.error('Summary generation error:', summaryError);
-          toast.error(summaryError.response?.data?.error || 'Failed to generate answer');
-        } finally {
-          setGeneratingSummary(false);
+        // Call onUploadSuccess to show ContentTabs (same as file upload)
+        if (onUploadSuccess && documentId) {
+          onUploadSuccess(documentId, 'Text Document');
         }
-
-        // Don't call onUploadSuccess for text input - we show summary inline
-        // onUploadSuccess(documentId, 'Text Document');
+        
+        // Clear text input after successful upload
+        setTextInput('');
       } catch (error) {
         console.error('Upload error:', error);
         toast.error(error.response?.data?.error || 'Failed to upload text');
@@ -147,239 +128,6 @@ const FileUpload = ({ onUploadSuccess, onTextSummaryGenerated }) => {
         setUploading(false);
       }
     }
-  };
-
-  // Smart text formatting with LaTeX support and beautiful styling
-  const formatText = (text) => {
-    const lines = text.split('\n');
-    const formatted = [];
-    let inList = false;
-    let listItems = [];
-    
-    lines.forEach((line, index) => {
-      const trimmed = line.trim();
-      
-      if (!trimmed) {
-        if (inList && listItems.length > 0) {
-          formatted.push(
-            <ul key={`list-${index}`} className="summary-list">
-              {listItems}
-            </ul>
-          );
-          listItems = [];
-          inList = false;
-        }
-        formatted.push(<div key={`space-${index}`} className="summary-spacer" />);
-        return;
-      }
-      
-      const blockMathMatch = trimmed.match(/^\$\$(.+?)\$\$$/);
-      if (blockMathMatch) {
-        if (inList) {
-          formatted.push(
-            <ul key={`list-${index}`} className="summary-list">
-              {listItems}
-            </ul>
-          );
-          listItems = [];
-          inList = false;
-        }
-        try {
-          formatted.push(
-            <div key={index} className="summary-math-block">
-              <BlockMath math={blockMathMatch[1]} />
-            </div>
-          );
-        } catch (e) {
-          formatted.push(
-            <div key={index} className="summary-math-block summary-error">
-              {trimmed}
-            </div>
-          );
-        }
-        return;
-      }
-      
-      if (trimmed.startsWith('###')) {
-        if (inList) {
-          formatted.push(
-            <ul key={`list-${index}`} className="summary-list">
-              {listItems}
-            </ul>
-          );
-          listItems = [];
-          inList = false;
-        }
-        formatted.push(
-          <h3 key={index} className="summary-heading-3">
-            {formatInlineContent(trimmed.replace(/^###\s*/, ''), index)}
-          </h3>
-        );
-      } else if (trimmed.startsWith('##')) {
-        if (inList) {
-          formatted.push(
-            <ul key={`list-${index}`} className="summary-list">
-              {listItems}
-            </ul>
-          );
-          listItems = [];
-          inList = false;
-        }
-        formatted.push(
-          <h2 key={index} className="summary-heading-2">
-            {formatInlineContent(trimmed.replace(/^##\s*/, ''), index)}
-          </h2>
-        );
-      } else if (trimmed.startsWith('#')) {
-        if (inList) {
-          formatted.push(
-            <ul key={`list-${index}`} className="summary-list">
-              {listItems}
-            </ul>
-          );
-          listItems = [];
-          inList = false;
-        }
-        formatted.push(
-          <h1 key={index} className="summary-heading-1">
-            {formatInlineContent(trimmed.replace(/^#\s*/, ''), index)}
-          </h1>
-        );
-      } else if (trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ')) {
-        inList = true;
-        const content = trimmed.replace(/^[-•*]\s*/, '');
-        listItems.push(
-          <li key={index} className="summary-list-item">
-            {formatInlineContent(content, index)}
-          </li>
-        );
-      } else if (/^\d+\.\s/.test(trimmed)) {
-        inList = true;
-        const content = trimmed.replace(/^\d+\.\s*/, '');
-        listItems.push(
-          <li key={index} className="summary-list-item numbered">
-            {formatInlineContent(content, index)}
-          </li>
-        );
-      } else {
-        if (inList) {
-          formatted.push(
-            <ul key={`list-${index}`} className="summary-list">
-              {listItems}
-            </ul>
-          );
-          listItems = [];
-          inList = false;
-        }
-        formatted.push(
-          <p key={index} className="summary-paragraph">
-            {formatInlineContent(trimmed, index)}
-          </p>
-        );
-      }
-    });
-    
-    if (inList && listItems.length > 0) {
-      formatted.push(
-        <ul key={`list-final`} className="summary-list">
-          {listItems}
-        </ul>
-      );
-    }
-    
-    return formatted;
-  };
-  
-  const formatInlineContent = (text, baseKey) => {
-    const parts = [];
-    let keyIndex = 0;
-    let lastIndex = 0;
-    const matches = [];
-    
-    const inlineMathRegex = /\$([^$]+?)\$/g;
-    let match;
-    while ((match = inlineMathRegex.exec(text)) !== null) {
-      matches.push({ 
-        type: 'math', 
-        start: match.index, 
-        end: match.index + match[0].length, 
-        content: match[1] 
-      });
-    }
-    
-    const boldRegex = /\*\*([^*]+?)\*\*/g;
-    while ((match = boldRegex.exec(text)) !== null) {
-      const isInMath = matches.some(m => m.type === 'math' && match.index >= m.start && match.index < m.end);
-      if (!isInMath) {
-        matches.push({ 
-          type: 'bold', 
-          start: match.index, 
-          end: match.index + match[0].length, 
-          content: match[1] 
-        });
-      }
-    }
-    
-    const italicRegex = /\*([^*\n]+?)\*/g;
-    while ((match = italicRegex.exec(text)) !== null) {
-      const isInMath = matches.some(m => m.type === 'math' && match.index >= m.start && match.index < m.end);
-      const isInBold = matches.some(m => m.type === 'bold' && match.index >= m.start && match.index < m.end);
-      const beforeChar = text[match.index - 1] || '';
-      const afterEnd = match.index + match[0].length;
-      const afterChar = text[afterEnd] || '';
-      const isBoldMarker = (beforeChar === '*' || afterChar === '*');
-      if (!isInMath && !isInBold && !isBoldMarker) {
-        matches.push({ 
-          type: 'italic', 
-          start: match.index, 
-          end: match.index + match[0].length, 
-          content: match[1] 
-        });
-      }
-    }
-    
-    matches.sort((a, b) => a.start - b.start);
-    
-    matches.forEach((match) => {
-      if (match.start > lastIndex) {
-        const beforeText = text.substring(lastIndex, match.start);
-        parts.push(<span key={`${baseKey}-text-${keyIndex++}`}>{beforeText}</span>);
-      }
-      
-      if (match.type === 'math') {
-        try {
-          parts.push(
-            <InlineMath 
-              key={`${baseKey}-math-${keyIndex++}`} 
-              math={match.content}
-              className="summary-math-inline"
-            />
-          );
-        } catch (e) {
-          parts.push(<span key={`${baseKey}-math-${keyIndex++}`} className="summary-error">${match.content}$</span>);
-        }
-      } else if (match.type === 'bold') {
-        parts.push(
-          <span key={`${baseKey}-bold-${keyIndex++}`} className="summary-bold">
-            {formatInlineContent(match.content, `${baseKey}-bold-${keyIndex}`)}
-          </span>
-        );
-      } else if (match.type === 'italic') {
-        parts.push(
-          <span key={`${baseKey}-italic-${keyIndex++}`} className="summary-italic">
-            {formatInlineContent(match.content, `${baseKey}-italic-${keyIndex}`)}
-          </span>
-        );
-      }
-      
-      lastIndex = match.end;
-    });
-    
-    if (lastIndex < text.length) {
-      parts.push(<span key={`${baseKey}-text-${keyIndex++}`}>{text.substring(lastIndex)}</span>);
-    }
-    
-    return parts.length > 0 ? parts : text;
   };
 
   return (
@@ -463,45 +211,24 @@ const FileUpload = ({ onUploadSuccess, onTextSummaryGenerated }) => {
         </div>
       )}
 
-      {(file || (activeTab === 'text' && textInput.trim())) && !textSummary && (
+      {(file || (activeTab === 'text' && textInput.trim())) && (
         <button
           className="upload-btn"
           onClick={handleUpload}
-          disabled={uploading || generatingSummary}
+          disabled={uploading}
         >
-          {(uploading || generatingSummary) ? (
+          {uploading ? (
             <>
               <div className="loading"></div>
-              <span>{uploading ? 'Uploading...' : 'Generating Summary...'}</span>
+              <span>Uploading...</span>
             </>
           ) : (
             <>
               <FiUpload size={20} />
-              <span>{activeTab === 'text' ? 'Get Answer' : 'Upload & Generate'}</span>
+              <span>Upload & Generate</span>
             </>
           )}
         </button>
-      )}
-
-      {/* Display summary inline for text input */}
-      {activeTab === 'text' && textSummary && (
-        <div className="text-summary-container">
-          <div className="text-summary-header">
-            <h3>💬 AI Response</h3>
-            <button
-              className="close-summary-btn"
-              onClick={() => {
-                setTextSummary(null);
-                setTextInput('');
-              }}
-            >
-              <FiX size={20} />
-            </button>
-          </div>
-          <div className="text-summary-content">
-            {formatText(textSummary)}
-          </div>
-        </div>
       )}
     </div>
   );

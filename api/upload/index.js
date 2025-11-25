@@ -1,41 +1,17 @@
 const multer = require('multer');
 const { parseFile } = require('../../backend/utils/fileParser');
 const Document = require('../../backend/models/Document');
-const mongoose = require('mongoose');
-
-// Connect to MongoDB
-const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) {
-    return;
-  }
-  
-  const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://faysalislamfd:NNhFFLEKMwxDb4mJ@cluster0.zj1pg.mongodb.net/?appName=Cluster0';
-  
-  try {
-    await mongoose.connect(mongoUri);
-    console.log('✅ MongoDB connected');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    throw error;
-  }
-};
+const { connectDB } = require('../utils/db');
+const { setCORSHeaders, handleOptions } = require('../utils/cors');
+const { shouldUseFileUpload } = require('../../backend/utils/textQuality');
+const { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } = require('../../backend/utils/constants');
 
 // Configure multer for memory storage
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain',
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/gif',
-      'image/webp'
-    ];
-    if (allowedTypes.includes(file.mimetype)) {
+    if (ALLOWED_FILE_TYPES.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(new Error('Invalid file type. Only PDF, DOCX, TXT, and image files are allowed.'));
@@ -45,14 +21,11 @@ const upload = multer({
 
 // Handler function
 const handleRequest = async (req, res) => {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  // Set CORS headers
+  setCORSHeaders(res);
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
+  // Handle OPTIONS preflight
+  if (handleOptions(req, res)) {
     return;
   }
 
@@ -90,25 +63,7 @@ const handleRequest = async (req, res) => {
     }
 
     const trimmedText = extractedText.trim();
-    const words = trimmedText.split(/\s+/).filter(w => w.length > 0);
-    const uniqueWords = new Set(words.map(w => w.toLowerCase()));
-    
-    const isEmpty = trimmedText.length === 0;
-    const isLowQualityText = !isEmpty && (
-      words.length < 50 || 
-      uniqueWords.size < 5 || 
-      (uniqueWords.size === 1 && words.length > 10) ||
-      (uniqueWords.size <= 3 && words.length > 20)
-    );
-    
-    const lowerText = trimmedText.toLowerCase();
-    const hasWatermark = !isEmpty && (
-      lowerText.includes('camscanner') || 
-      lowerText.includes('scanner') ||
-      (uniqueWords.size === 1 && words.length > 5)
-    );
-    
-    const useFileUpload = isImage || isEmpty || isLowQualityText || hasWatermark;
+    const useFileUpload = shouldUseFileUpload(trimmedText, isImage);
     
     const documentData = {
       filename: `memory-${Date.now()}-${req.file.originalname}`,
